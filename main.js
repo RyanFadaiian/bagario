@@ -21,6 +21,18 @@ const player = {
   speed: 260, // pixels/sec
 };
 
+// Number of orbs
+let orbs = [];
+
+for (let i = 0; i < 300; i++) {
+  const orb = {
+    x: Math.random() * world.width,
+    y: Math.random() * world.height,
+    r: 4,
+  };
+  orbs.push(orb);
+}
+
 const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 window.addEventListener("mousemove", (e) => {
   mouse.x = e.clientX;
@@ -67,6 +79,19 @@ function update(dt) {
   // Keep player inside the world
   player.x = clamp(player.x, player.r, world.width - player.r);
   player.y = clamp(player.y, player.r, world.height - player.r);
+
+  // Orb collision
+  for (let i = orbs.length - 1; i >= 0; i--) {
+    let dx = player.x - orbs[i].x
+    let dy = player.y - orbs[i].y
+
+    const len = Math.hypot(dx, dy)
+
+    if (len < player.r + orbs[i].r) {
+      orbs.splice(i, 1)
+      player.r += 1
+    }
+  }
 }
 
 function render() {
@@ -106,6 +131,15 @@ function render() {
   ctx.strokeStyle = "rgba(255,255,255,0.25)";
   ctx.lineWidth = 4;
   ctx.strokeRect(-camX, -camY, world.width, world.height);
+
+  // Orbs
+  ctx.fillStyle = "#ee16e3";
+
+  for (let i = 0; i < orbs.length; i++) {
+    ctx.beginPath();
+    ctx.arc(orbs[i].x - camX, orbs[i].y - camY, orbs[i].r, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   // Player
   ctx.fillStyle = "#4ade80";
